@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Vasunetra — Official Dashboard (Survey Report style)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#efece3;
+    --panel:#ffffff;
+    --ink:#232722;
+    --ink-dim:#6b6f66;
+    --line:#d8d4c6;
+    --line-strong:#b9b5a4;
+    --forest:#3f5b3f;
+    --forest-soft:rgba(63,91,63,0.10);
+    --ochre:#a9772f;
+    --ochre-soft:rgba(169,119,47,0.12);
+    --clay:#a5502f;
+    --clay-soft:rgba(165,80,47,0.13);
+    --brick:#7a2e20;
+    --brick-soft:rgba(122,46,32,0.14);
+    --blue:#3f6480;
+    --teal:#3f8073;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{background:var(--paper); color:var(--ink); font-family:'IBM Plex Sans', sans-serif;
+    background-image:
+      repeating-linear-gradient(0deg, transparent, transparent 30px, rgba(0,0,0,0.018) 31px),
+      repeating-linear-gradient(90deg, transparent, transparent 30px, rgba(0,0,0,0.018) 31px);
+  }
+
+  .navbar{
+    background:var(--panel); border-bottom:2px solid var(--ink);
+    padding:18px 32px; display:flex; align-items:baseline; justify-content:space-between; flex-wrap:wrap; gap:10px;
+  }
+  .navbar-left{display:flex; align-items:baseline; gap:14px; flex-wrap:wrap;}
+  .navbar .wordmark{font-family:'Fraunces', serif; font-weight:560; font-size:23px;}
+  .navbar .sep{color:var(--line-strong);}
+  .navbar .subtitle{font-size:13.5px; color:var(--ink-dim);}
+  .navbar .updated{font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:var(--ink-dim);}
+
+  .wrap{max-width:1180px;margin:0 auto;padding:24px 32px 60px;}
+
+  .alert-banner{
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--brick-soft); border:1px solid var(--brick); color:#5c2317;
+    border-radius:2px; padding:11px 16px; margin-bottom:18px; font-size:13px;
+  }
+  .alert-banner button{background:none; border:1px solid var(--brick); color:#5c2317; font-size:11px; padding:4px 10px; border-radius:2px; cursor:pointer; font-family:'IBM Plex Sans', sans-serif;}
+
+  .stat-strip{display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:22px;}
+  @media (max-width:760px){ .stat-strip{grid-template-columns:repeat(2,1fr);} }
+  .stat-card{background:var(--panel); border:1px solid var(--line); border-top:3px solid var(--line-strong); padding:14px 16px;}
+  .stat-card.k-clay{border-top-color:var(--clay);}
+  .stat-card.k-brick{border-top-color:var(--brick);}
+  .stat-card.k-ochre{border-top-color:var(--ochre);}
+  .stat-card .lbl{font-size:12px; color:var(--ink-dim); margin-bottom:8px;}
+  .stat-card .val{font-family:'Fraunces', serif; font-weight:500; font-size:28px; line-height:1;}
+
+  .grid{display:grid; grid-template-columns:1.3fr 1fr; gap:18px; align-items:start;}
+  @media (max-width:920px){ .grid{grid-template-columns:1fr;} }
+
+  .panel{background:var(--panel); border:1px solid var(--line); padding:22px 22px 20px; margin-bottom:18px;}
+  .panel-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:16px; flex-wrap:wrap; gap:8px;}
+  .panel h2{font-family:'Fraunces', serif; font-weight:500; font-size:18px; margin:0;}
+  .toggle{display:flex; border:1px solid var(--ink); overflow:hidden;}
+  .toggle button{background:transparent; border:none; color:var(--ink-dim); font-family:'IBM Plex Sans', sans-serif; font-size:12px; padding:6px 12px; cursor:pointer;}
+  .toggle button.active{background:var(--ink); color:var(--paper);}
+  .toggle button:not(:last-child){border-right:1px solid var(--ink);}
+
+  .map-field{
+    display:flex; flex-wrap:wrap; gap:22px 26px; padding:20px 6px 8px;
+    border:1px solid var(--line);
+  }
+  .node{text-align:center; cursor:pointer; width:78px; padding:6px 2px; border:1px solid transparent;}
+  .node:hover{background:rgba(0,0,0,0.025);}
+  .node.selected{border-color:var(--ink);}
+  .node.hidden{display:none;}
+  .node .dot{width:32px; height:32px; border-radius:50%; margin:0 auto 8px; border:2px solid var(--ink);}
+  .node .nm{font-size:11px; font-weight:500; line-height:1.25;}
+  .node .sc{font-family:'IBM Plex Mono', monospace; font-size:10px; color:var(--ink-dim); margin-top:2px;}
+  .map-legend{display:flex; gap:18px; flex-wrap:wrap; margin-top:16px; font-size:11.5px; color:var(--ink-dim);}
+  .map-legend span{display:inline-flex; align-items:center; gap:6px;}
+  .map-legend i{width:8px; height:8px; border-radius:50%; display:inline-block; border:1px solid var(--ink);}
+
+  .filter-row{display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;}
+  .filter-row input, .filter-row select{
+    background:var(--paper); border:1px solid var(--line-strong); color:var(--ink);
+    font-family:'IBM Plex Sans', sans-serif; font-size:12.5px; padding:7px 10px;
+  }
+  .filter-row input{flex:1; min-width:120px;}
+  .icon-btn{background:var(--paper); border:1px solid var(--ink); color:var(--ink); font-family:'IBM Plex Sans', sans-serif; font-size:12px; padding:7px 12px; cursor:pointer;}
+  .icon-btn:hover{background:var(--ink); color:var(--paper);}
+
+  .wl-row{display:grid; grid-template-columns:auto 1fr auto auto; align-items:center; gap:12px; padding:11px 8px; border-bottom:1px solid var(--line); cursor:pointer;}
+  .wl-row.hidden{display:none;}
+  .wl-row:last-child{border-bottom:none;}
+  .wl-row:hover, .wl-row.selected{background:rgba(0,0,0,0.025);}
+  .wl-rank{font-family:'IBM Plex Mono', monospace; font-size:11.5px; color:var(--ink-dim); width:16px;}
+  .wl-name{font-size:13.5px; font-weight:500;}
+  .badge{padding:3px 9px; font-size:11px; font-weight:500; white-space:nowrap; border:1px solid;}
+  .badge.tier-1{background:var(--forest-soft); color:var(--forest); border-color:var(--forest);}
+  .badge.tier-2{background:var(--ochre-soft); color:var(--ochre); border-color:var(--ochre);}
+  .badge.tier-3{background:var(--clay-soft); color:var(--clay); border-color:var(--clay);}
+  .badge.tier-4{background:var(--brick-soft); color:var(--brick); border-color:var(--brick);}
+  .wl-action{font-size:12px; color:var(--ink-dim); text-align:right; min-width:96px;}
+  .empty-msg{font-size:12.5px; color:var(--ink-dim); padding:14px 4px;}
+
+  .vd-title{font-family:'Fraunces', serif; font-size:17px; font-weight:500; margin-bottom:2px;}
+  .why-label{font-size:12px; color:var(--ink-dim); margin-bottom:8px;}
+  .stack-bar{display:flex; width:100%; height:16px; overflow:hidden; margin-bottom:8px; border:1px solid var(--ink);}
+  .stack-legend{display:flex; gap:16px; flex-wrap:wrap; font-size:11px; color:var(--ink-dim); margin-bottom:18px;}
+  .stack-legend span{display:inline-flex; align-items:center; gap:5px;}
+  .stack-legend i{width:8px; height:8px; display:inline-block;}
+  .vd-line{font-size:13px; color:var(--ink-dim); margin-bottom:10px; line-height:1.5;}
+  .vd-line b{color:var(--ink); font-weight:500;}
+  .vd-alert{background:var(--brick-soft); border:1px solid var(--brick); color:#5c2317; font-size:12.5px; padding:10px 12px; margin:6px 0 14px;}
+  .vd-capacity{display:flex; align-items:center; gap:12px; margin-top:4px;}
+  .cap-bar{flex:1; height:8px; background:var(--paper); overflow:hidden; border:1px solid var(--ink);}
+  .cap-fill{height:100%;}
+  .cap-txt{font-family:'IBM Plex Mono', monospace; font-size:11px; color:var(--ink-dim); white-space:nowrap;}
+
+  footer{margin-top:8px; padding-top:16px; border-top:1px solid var(--line); font-size:11.5px; color:var(--ink-dim); font-family:'IBM Plex Mono', monospace; display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+</style>
+</head>
+<body>
+
+<div class="navbar">
+  <div class="navbar-left">
+    <span class="wordmark">Vasunetra</span>
+    <span class="sep">|</span>
+    <span class="subtitle">Official Dashboard — Aizawl District</span>
+  </div>
+  <span class="updated" id="updatedAt"></span>
+</div>
+
+<div class="wrap">
+
+  <div id="alertBanner"></div>
+  <div class="stat-strip" id="statStrip"></div>
+
+  <div class="grid">
+    <div class="col-left">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Risk map</h2>
+          <div class="toggle">
+            <button id="btnRisk" class="active">Risk view</button>
+            <button id="btnLand">Land-change view</button>
+          </div>
+        </div>
+        <div class="map-field" id="mapField"></div>
+        <div class="map-legend" id="mapLegend"></div>
+      </div>
+    </div>
+
+    <div class="col-right">
+      <div class="panel">
+        <div class="panel-head">
+          <h2>Ranked worklist</h2>
+          <button class="icon-btn" id="exportBtn">Export CSV</button>
+        </div>
+        <div class="filter-row">
+          <input type="text" id="searchInput" placeholder="Search village…"/>
+          <select id="tierFilter">
+            <option value="all">All actions</option>
+            <option value="4">Immediate verification</option>
+            <option value="3">Relocation assessment</option>
+            <option value="2">Enhanced monitoring</option>
+            <option value="1">Routine monitoring</option>
+          </select>
+        </div>
+        <div id="worklist"></div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><h2 id="vdTitle">Village detail</h2></div>
+        <div id="villageDetail"></div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <span id="footLeft"></span>
+    <span>Computed client-side from villages.csv, matching backend/scoring.py</span>
+  </footer>
+
+</div>
+
+<script>
+  const villages = [
+    { village:"Sialsuk",        area:"Aizawl district",   slope:0.82, rainfall:0.75, population:152, access_score:0.4,  land_change:0.65, prev_rank:7 },
+    { village:"Zohmun",         area:"Aizawl district",   slope:0.55, rainfall:0.60, population:210, access_score:0.6,  land_change:0,    prev_rank:null },
+    { village:"Thenzawl",       area:"Serchhip district", slope:0.48, rainfall:0.65, population:95,  access_score:0.5,  land_change:0,    prev_rank:null },
+    { village:"Reiek",          area:"Aizawl district",   slope:0.20, rainfall:0.30, population:180, access_score:0.8,  land_change:0,    prev_rank:null },
+    { village:"Aizawl Rural 1", area:"Aizawl district",   slope:0.70, rainfall:0.55, population:300, access_score:0.3,  land_change:0.15, prev_rank:null },
+    { village:"Aizawl Rural 2", area:"Aizawl district",   slope:0.35, rainfall:0.40, population:120, access_score:0.7,  land_change:0,    prev_rank:null },
+    { village:"Lungdai",        area:"Aizawl district",   slope:0.65, rainfall:0.70, population:88,  access_score:0.45, land_change:0.12, prev_rank:null },
+  ];
+
+  function actionFor(h){
+    if (h > 0.75) return {label:"Immediate verification", short:"Verify now", tier:4};
+    if (h > 0.55) return {label:"Relocation assessment",  short:"Assess",     tier:3};
+    if (h > 0.35) return {label:"Enhanced monitoring",     short:"Monitor+",   tier:2};
+    return              {label:"Routine monitoring",      short:"Routine",    tier:1};
+  }
+  const tierColor = {1:'#3f5b3f', 2:'#a9772f', 3:'#a5502f', 4:'#7a2e20'};
+  const tierName  = {1:'Low', 2:'Med', 3:'Med-high', 4:'High'};
+
+  const scored = villages.map(v => {
+    const slopeC = 0.40*v.slope, rainC = 0.35*v.rainfall, landC = 0.25*v.land_change;
+    const hazard = slopeC + rainC + landC;
+    const relocation = hazard * v.population * (1/v.access_score);
+    const action = actionFor(hazard);
+    const current_hh = Math.round(v.population/4);
+    const safe_hh = Math.round(current_hh * (1 - hazard*0.3));
+    const pressure = current_hh/safe_hh;
+    const pressureTier = pressure > 1.2 ? 'high' : (pressure > 1.05 ? 'moderate' : 'low');
+    return {...v, slopeC, rainC, landC, hazard_score:hazard, relocation_score:relocation, action, current_hh, safe_hh, pressure, pressureTier};
+  });
+  scored.sort((a,b) => b.relocation_score - a.relocation_score);
+  scored.forEach((v,i) => v.rank = i+1);
+
+  let colorMode = 'risk';
+  let selected  = 'Sialsuk';
+  let search = '';
+  let tierFilterVal = 'all';
+
+  const escalated = scored.filter(v => v.prev_rank && v.prev_rank > v.rank + 2);
+  if (escalated.length){
+    const names = escalated.map(v=>`${v.village} (#${v.prev_rank} → #${v.rank})`).join(', ');
+    document.getElementById('alertBanner').innerHTML = `
+      <div class="alert-banner">
+        <span>${escalated.length} village${escalated.length>1?'s':''} escalated this week: ${names}</span>
+        <button id="dismissAlert">Dismiss</button>
+      </div>`;
+    document.getElementById('dismissAlert').addEventListener('click', () => { document.getElementById('alertBanner').innerHTML=''; });
+  }
+
+  const highRisk = scored.filter(v => v.action.tier >= 3).length;
+  const needVerify = scored.filter(v => v.action.tier === 4).length;
+  const capPressure = scored.filter(v => v.pressureTier === 'high').length;
+  const landAlerts = scored.filter(v => v.land_change > 0.1).length;
+  document.getElementById('statStrip').innerHTML = `
+    <div class="stat-card k-clay"><div class="lbl">High-risk villages</div><div class="val">${highRisk}</div></div>
+    <div class="stat-card k-brick"><div class="lbl">Need verification</div><div class="val">${needVerify}</div></div>
+    <div class="stat-card k-ochre"><div class="lbl">Capacity pressure</div><div class="val">${capPressure}</div></div>
+    <div class="stat-card k-clay"><div class="lbl">Land-change alerts</div><div class="val">${landAlerts}</div></div>
+  `;
+  document.getElementById('updatedAt').textContent = 'Updated just now';
+  document.getElementById('footLeft').textContent = `${scored.length} villages monitored`;
+
+  function landChangeColor(v){
+    if (v.land_change > 0.4) return '#7a2e20';
+    if (v.land_change > 0.1) return '#a9772f';
+    return '#3f5b3f';
+  }
+  function matchesFilter(v){
+    const s = search.trim().toLowerCase();
+    const matchSearch = !s || v.village.toLowerCase().includes(s);
+    const matchTier = tierFilterVal === 'all' || v.action.tier === Number(tierFilterVal);
+    return matchSearch && matchTier;
+  }
+
+  function renderGrid(){
+    const field = document.getElementById('mapField');
+    field.innerHTML = scored.map(v => {
+      const color = colorMode === 'risk' ? tierColor[v.action.tier] : landChangeColor(v);
+      const scoreTxt = colorMode === 'risk' ? v.hazard_score.toFixed(2) : (v.land_change*100).toFixed(0)+'%';
+      const sel = v.village === selected ? 'selected' : '';
+      const hide = matchesFilter(v) ? '' : 'hidden';
+      return `
+        <div class="node ${sel} ${hide}" data-village="${v.village}">
+          <div class="dot" style="background:${color}"></div>
+          <div class="nm">${v.village}</div>
+          <div class="sc">${scoreTxt}</div>
+        </div>`;
+    }).join('');
+    field.querySelectorAll('.node').forEach(n => n.addEventListener('click', () => selectVillage(n.dataset.village)));
+    const legend = document.getElementById('mapLegend');
+    if (colorMode === 'risk'){
+      legend.innerHTML = `
+        <span><i style="background:#3f5b3f"></i>Routine</span>
+        <span><i style="background:#a9772f"></i>Enhanced monitoring</span>
+        <span><i style="background:#a5502f"></i>Relocation assessment</span>
+        <span><i style="background:#7a2e20"></i>Immediate verification</span>`;
+    } else {
+      legend.innerHTML = `
+        <span><i style="background:#3f5b3f"></i>No change detected</span>
+        <span><i style="background:#a9772f"></i>Moderate change</span>
+        <span><i style="background:#7a2e20"></i>Significant change</span>`;
+    }
+  }
+
+  document.getElementById('btnRisk').addEventListener('click', () => { colorMode='risk'; setToggle(); renderGrid(); });
+  document.getElementById('btnLand').addEventListener('click', () => { colorMode='land'; setToggle(); renderGrid(); });
+  function setToggle(){
+    document.getElementById('btnRisk').classList.toggle('active', colorMode==='risk');
+    document.getElementById('btnLand').classList.toggle('active', colorMode==='land');
+  }
+
+  function renderWorklist(){
+    const el = document.getElementById('worklist');
+    const visible = scored.filter(matchesFilter);
+    if (!visible.length){ el.innerHTML = `<div class="empty-msg">No villages match this filter.</div>`; return; }
+    el.innerHTML = visible.map(v => `
+      <div class="wl-row ${v.village===selected?'selected':''}" data-village="${v.village}">
+        <span class="wl-rank">${String(v.rank).padStart(2,'0')}</span>
+        <span class="wl-name">${v.village}</span>
+        <span class="badge tier-${v.action.tier}">${tierName[v.action.tier]}</span>
+        <span class="wl-action">${v.action.short}</span>
+      </div>
+    `).join('');
+    el.querySelectorAll('.wl-row').forEach(r => r.addEventListener('click', () => selectVillage(r.dataset.village)));
+  }
+
+  document.getElementById('searchInput').addEventListener('input', (e) => { search = e.target.value; renderWorklist(); renderGrid(); });
+  document.getElementById('tierFilter').addEventListener('change', (e) => { tierFilterVal = e.target.value; renderWorklist(); renderGrid(); });
+
+  document.getElementById('exportBtn').addEventListener('click', () => {
+    const header = ['rank','village','area','hazard_score','relocation_score','recommended_action','current_hh','safe_hh_estimate','pressure'];
+    const rows = scored.map(v => [v.rank, v.village, v.area, v.hazard_score.toFixed(3), v.relocation_score.toFixed(1), v.action.label, v.current_hh, v.safe_hh, v.pressureTier]);
+    const csv = [header.join(','), ...rows.map(r => r.map(x => `"${x}"`).join(','))].join('\n');
+    const blob = new Blob([csv], {type:'text/csv'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a'); a.href = url; a.download = 'vasunetra_worklist.csv'; a.click();
+    URL.revokeObjectURL(url);
+  });
+
+  function renderDetail(){
+    const v = scored.find(x => x.village === selected);
+    document.getElementById('vdTitle').textContent = `Village detail — ${v.village}`;
+    const total = v.hazard_score;
+    const pct = x => (x/total*100).toFixed(0);
+    let html = `
+      <div class="why-label">Why this score?</div>
+      <div class="stack-bar">
+        <div style="width:${pct(v.slopeC)}%; background:var(--blue)"></div>
+        <div style="width:${pct(v.rainC)}%; background:var(--teal)"></div>
+        ${v.landC > 0 ? `<div style="width:${pct(v.landC)}%; background:var(--clay)"></div>` : ''}
+      </div>
+      <div class="stack-legend">
+        <span><i style="background:var(--blue)"></i>Slope (${v.slopeC.toFixed(2)})</span>
+        <span><i style="background:var(--teal)"></i>Rainfall (${v.rainC.toFixed(2)})</span>
+        ${v.landC > 0 ? `<span><i style="background:var(--clay)"></i>Land change (${v.landC.toFixed(2)})</span>` : ''}
+      </div>
+      <div class="vd-line">Confidence: <b>${v.land_change>0 ? 'High — includes recent imagery' : 'Moderate — no recent imagery yet'}</b> &nbsp;·&nbsp; Recommended action: <b>${v.action.label}</b></div>
+    `;
+    if (v.prev_rank && v.prev_rank !== v.rank){
+      html += `<div class="vd-alert">Trend: rank #${v.prev_rank} → #${v.rank} this week (escalation alert)</div>`;
+    } else {
+      html += `<div class="vd-line">Trend: rank unchanged this week</div>`;
+    }
+    const capColor = v.pressureTier === 'high' ? '#7a2e20' : (v.pressureTier === 'moderate' ? '#a9772f' : '#3f5b3f');
+    html += `
+      <div class="vd-line">Capacity: <b>${v.current_hh} HH current</b> / ${v.safe_hh} HH safe-zone estimate &nbsp;(pressure: <b style="color:${capColor}">${v.pressureTier}</b>)</div>
+      <div class="vd-capacity">
+        <div class="cap-bar"><div class="cap-fill" style="width:${Math.min(100, v.pressure*70).toFixed(0)}%; background:${capColor}"></div></div>
+        <span class="cap-txt">${(v.pressure*100).toFixed(0)}% of safe-zone capacity</span>
+      </div>
+    `;
+    document.getElementById('villageDetail').innerHTML = html;
+  }
+
+  function selectVillage(name){ selected = name; renderGrid(); renderWorklist(); renderDetail(); }
+
+  setToggle();
+  renderGrid();
+  renderWorklist();
+  renderDetail();
+</script>
+</body>
+</html>
