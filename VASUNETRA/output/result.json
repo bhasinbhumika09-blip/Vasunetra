@@ -1,0 +1,55 @@
+{
+  "quality": {
+    "before": {
+      "sharpness": 443.6,
+      "resolution": "1600x1200",
+      "usable": true,
+      "issues": []
+    },
+    "after": {
+      "sharpness": 422.2,
+      "resolution": "1600x1200",
+      "usable": true,
+      "issues": []
+    }
+  },
+  "alignment": {
+    "feature_matches": 2000,
+    "good_matches": 1204,
+    "inliers": 1040,
+    "alignment_confidence": 86.4
+  },
+  "change": {
+    "total_area_px": 1920000,
+    "changed_area_px": 125768,
+    "changed_area_pct": 6.55,
+    "significant_regions": 26,
+    "top_regions": [
+      {
+        "area_px": 53506,
+        "relative_pct": 2.79
+      },
+      {
+        "area_px": 20597,
+        "relative_pct": 1.07
+      },
+      {
+        "area_px": 17971,
+        "relative_pct": 0.94
+      },
+      {
+        "area_px": 9028,
+        "relative_pct": 0.47
+      },
+      {
+        "area_px": 1744,
+        "relative_pct": 0.09
+      }
+    ]
+  },
+  "evidence_confidence": {
+    "score": 86.4,
+    "label": "HIGH"
+  },
+  "evidence_image": "output/evidence_report.jpg"
+}

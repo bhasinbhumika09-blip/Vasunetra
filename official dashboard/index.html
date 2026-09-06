@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vasunetra | Official Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <span class="globe">🌍</span>
+    <span>VASUNETRA</span>
+    <span class="divider">|</span>
+    <span class="subtitle">Official Dashboard — Aizawl District</span>
+  </div>
+  <div class="updated" id="updatedText">Updated just now</div>
+</header>
+
+<main>
+
+  <div class="stats-grid" id="statsGrid"></div>
+
+  <div class="layout">
+    <div>
+      <div class="panel">
+        <div class="kicker">Village Risk Overview</div>
+        <h2 class="section-title" style="margin-bottom:2px;">🗺️ Where the risk sits</h2>
+        <p style="color:var(--muted);font-size:13px;margin-top:0;">Tap a village to see its detail and score breakdown. Positions are illustrative — this view will move onto a real map once GPS coordinates are added.</p>
+        <div class="village-grid" id="villageGrid"></div>
+        <div class="legend">
+          <span><i style="background:var(--red)"></i> High risk</span>
+          <span><i style="background:var(--amber)"></i> Medium</span>
+          <span><i style="background:var(--green)"></i> Low / stable</span>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="kicker">Ranked Worklist</div>
+        <h2 class="section-title">📋 Villages by priority</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Village</th>
+              <th>Risk</th>
+              <th>Recommended action</th>
+              <th>High pop.</th>
+            </tr>
+          </thead>
+          <tbody id="worklistBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div>
+      <div class="panel" id="detailPanel"></div>
+      <div class="mock-note">
+        📦 Showing sample data built into this page — no backend connection yet. Once the API is live, this will call <code>/api/worklist</code> and <code>/api/villages/&lt;name&gt;</code> and everything here updates automatically.
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="fbrand">🌍 VASUNETRA</div>
+  Disaster Management Decision-Support System · Official View · Prototype · SIH 2026
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
